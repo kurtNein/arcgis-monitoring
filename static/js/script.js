@@ -27,7 +27,7 @@ async function fetchData(url) {
         const count = Object.keys(data.message).length;
         // Set to "Success" state
         updateOutput('main content', formattedData, 'response');
-        updateOutput('alert success', `Success - ${count} records found.`, 'output');
+        updateOutput('alert success', `Success - ${count} items.`, 'output');
     } catch (error) {
         // Set to "Error" state
         updateOutput('alert error', 'Error fetching data.', 'output');
@@ -47,4 +47,9 @@ document.getElementById('fetch-user').addEventListener('click', async function()
 // Async function for "Get Status" button
 document.getElementById('fetch-status').addEventListener('click', async function() {
     await fetchData('/api/status', 'output');
+});
+
+// Async function for "Get Status" button
+document.getElementById('backup-agol').addEventListener('click', async function() {
+    await fetchData('/api/backup', 'output');
 });

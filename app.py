@@ -38,6 +38,10 @@ def get_status():
     data = {'message': {'Status': 'Everything is running smoothly'}}
     return jsonify(data)
 
+@app.route('/api/backup', methods=['GET'])
+def get_backup():
+    data = {'message': am.download_items_locally()}
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True)

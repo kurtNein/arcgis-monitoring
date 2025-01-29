@@ -122,23 +122,24 @@ class AutoMod:
 
     def download_items_locally(self, download_format='File Geodatabase'):
         arcpy.AddMessage("Logged in as " + str(self.gis.properties.user.username))
-
+        downloaded_items = {}
         try:
             # Search items by username
             items = self.gis.content.search(query='owner:*', item_type='Feature *', max_items=500)
             for item in items:
-                print(item)
+                print(item.id, item.title, item.owner)
             print(f"Search found {len(items)} items in this portal available.")
 
             # Loop through each item and if equal to Feature service then download it
             for item in items:
-                if item.type:
+                if item.type and item.id in ['6bb0b2235eb242c7b1163b5d5245dba3','b7649193f7ee4f1ba05df393c5bbe449']:
                     try:
                         print(f"Working on {item.title}...")
                         result = item.export('sample {}'.format(item.title), download_format)
                         result.download(
                             f"AGOL_{self.gis.properties.user.lastName}__{time.strftime('%m-%d-%Y', time.localtime())}")
                         print(f"Processed {item.title}")
+                        downloaded_items[item.id] = [item.title, item.owner]
                         # Delete the item after it downloads to save on space
                         result.delete()
 
@@ -147,6 +148,7 @@ class AutoMod:
                         continue
         except Exception as e:
             print(e)
+        return downloaded_items
 
     def transfer_content(self, transfer_from_user: str, transfer_to_user: str):
         old_user_object = self.gis.users.get(transfer_from_user)
