@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web UI Example</title>
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+
+    <header class="header">
+        <img src="./static/gis-seal.png" width="120" height="120" style="vertical-align:middle;horizontal-align:left;padding-bottom:16px;padding-right:2em;"/>
+        <div style="display:inline-block;">
+            <h1> Enterprise Mapping Monitoring Interface</h1>
+        </div>
+    </header>
+    <main class="main-content">
+        <div class="container">
+            <div class="one-third">
+                <section class="card" style="min-height: 50em;">
+                    <h2>Menu</h2>
+                    <a href="./">ArcGIS Online Tools</a><br>
+                    <a href="portal.html">Enterprise Portal</a>
+                </section>
+            </div>
+            <div class="two-thirds">
+                <section class="card">
+                    <h2>Portal Tools</h2>
+                    <p>One-click tools to check ArcGIS functionalities.</p>
+                    <!-- Multiple buttons for different fetches -->
+                    <button class="btn-primary" id="fetch-status">Get Portal Status</button>
+                </section>
+                <div class="output" id="output"></div>
+
+                <section class="card">
+                    <div class="response" id="response"></div>
+                </section>
+            </div>
+
+        </div>
+        <section class="feedback">
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>For internal use only.</p>
+    </footer>
+
+    <script type="text/javascript" src="static/js/script.js"></script>
+
+</body>
+</html>
