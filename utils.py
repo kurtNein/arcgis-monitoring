@@ -9,13 +9,23 @@ from arcgis.gis import GIS
 from datetime import datetime, timedelta
 import time
 import csv
+import json
 
 
 class AutoMod:
     def __init__(self):
+        with open('stats.json') as f:
+            # Load the JSON data into a Python dictionary
+            data = json.load(f)
+
+        # Access the value you need
+        self.username = data['agol']['username']
+        self.password = data['agol']['password']
+        print(self.username)
         try:
+
             self.gis = GIS('home')
-            self.init_message = "Logged in as " + str(self.gis.properties.user.username)
+
         except Exception as e:
             print(e)
 
@@ -174,9 +184,17 @@ class AutoMod:
 
 class EnterpriseMod:
     def __init__(self):
-        try:
-            self.gis = GIS('home')
+        with open('stats.json') as f:
+            # Load the JSON data into a Python dictionary
+            data = json.load(f)
 
+        # Access the value you need
+        self.username = data['egdb']['username']
+        self.password = data['egdb']['password']
+        print(self.username)
+        try:
+            self.gis = GIS('https://maps.mercercounty.org/portal', self.username, self.password)
+            print(f'Logged in as {self.gis.properties.user.username}')
 
 
         except Exception as e:
@@ -184,7 +202,7 @@ class EnterpriseMod:
 
     def download_items_locally(self):
         sde_path = r"C:\Users\kcneinstedt\OneDrive - mercercounty.org\Documents\ArcGIS\Projects\Emergency Management\640gis01(4).sde"
-        local_gdb_path = os.path.join(os.getcwd(), "outputs", fr"egdb_backup_{time.strftime('%y_%m_%d')}.gdb")
+        local_gdb_path = os.path.join(os.getcwd(), "outputs", fr"egdb_backup_{time.strftime('%m-%d-%Y')}.gdb")
 
         # Ensure output GDB exists
         if not arcpy.Exists(local_gdb_path):
@@ -195,8 +213,15 @@ class EnterpriseMod:
 
         # Get feature classes
         feature_classes = arcpy.ListFeatureClasses()
-
+        print(feature_classes)
         datasets = arcpy.ListDatasets(feature_type="Feature") or []
+
+        # Copy standalone feature classes
+        for fc in feature_classes:
+            source_fc = os.path.join(sde_path, fc)
+            dest_fc = os.path.join(local_gdb_path, fc)
+            print(f"Copying {fc}...")
+            arcpy.CopyFeatures_management(source_fc, dest_fc)
 
 
 if __name__ == '__main__':
