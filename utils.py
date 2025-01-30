@@ -3,7 +3,7 @@ This file is for the handler classes. Handlers authenticate through a particular
 They can then perform several methods to fetch or save information from that portal.
 Information available is limited to the information available to the current GIS user, handled by ArcGIS authentication.
 """
-
+import os.path
 import arcpy
 from arcgis.gis import GIS
 from datetime import datetime, timedelta
@@ -25,12 +25,12 @@ class AutoMod:
     def get_services_in_no_web_maps(self):
         from arcgis.mapping import WebMap
 
-        # We want to create a list of AGOL services and store the results.
+        # List of AGOL services.
         services = (self.gis.content.search(query="", item_type="Feature Service", max_items=1000))
         total_services_queried = len(services)
         print(services, "\n", f"There are {total_services_queried} of this type")
 
-        # We want to specifically search AGOL for the org's Web Maps.
+        # Search AGOL for Web Maps.
         web_maps = self.gis.content.search(query="", item_type="Web Map", max_items=1000)
         print(web_maps)
 
@@ -172,6 +172,33 @@ class AutoMod:
         for user in transfer_from_users:
             self.transfer_content(user, transfer_to_user)
 
+class EnterpriseMod:
+    def __init__(self):
+        try:
+            self.gis = GIS('home')
+
+
+
+        except Exception as e:
+            print(e)
+
+    def download_items_locally(self):
+        sde_path = r"C:\Users\kcneinstedt\OneDrive - mercercounty.org\Documents\ArcGIS\Projects\Emergency Management\640gis01(4).sde"
+        local_gdb_path = os.path.join(os.getcwd(), "outputs", fr"egdb_backup_{time.strftime('%y_%m_%d')}.gdb")
+
+        # Ensure output GDB exists
+        if not arcpy.Exists(local_gdb_path):
+            arcpy.CreateFileGDB_management(os.path.dirname(local_gdb_path), os.path.basename(local_gdb_path))
+
+        # Set workspace to the Enterprise GDB
+        arcpy.env.workspace = sde_path
+
+        # Get feature classes
+        feature_classes = arcpy.ListFeatureClasses()
+
+        datasets = arcpy.ListDatasets(feature_type="Feature") or []
+
 
 if __name__ == '__main__':
-    am = AutoMod()
+    em = EnterpriseMod()
+    em.download_items_locally()
