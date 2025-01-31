@@ -13,10 +13,10 @@ function formatDictAsHTML(dict) {
 }
 
 // Async function to fetch data
-async function fetchData(url) {
+async function fetchData(url, id) {
     try {
         // Set to "Loading..." state
-        updateOutput('alert info', 'Loading...', 'output');
+        updateOutput('alert info', 'Loading...', id);
         updateOutput('', '', 'response')
 
         // Wait for the fetch request to complete
@@ -33,6 +33,7 @@ async function fetchData(url) {
         updateOutput('alert error', 'Error fetching data.', 'output');
     }
 }
+
 
 // Async function for "Get List Count" button
 document.getElementById('fetch-list').addEventListener('click', async function() {
@@ -52,4 +53,9 @@ document.getElementById('fetch-status').addEventListener('click', async function
 // Async function for "Get Status" button
 document.getElementById('backup-agol').addEventListener('click', async function() {
     await fetchData('/api/backup', 'output');
+});
+
+// Async function for "Get Status" button
+document.getElementById('last-backup').addEventListener('click', async function() {
+    await fetchData('/api/last_stats', 'output');
 });

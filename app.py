@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from utils import AutoMod, EnterpriseMod
-
+import json
 
 app = Flask(__name__)
 
@@ -10,7 +10,6 @@ em = EnterpriseMod()
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/portal.html')
 def portal():
@@ -40,7 +39,25 @@ def get_status():
 
 @app.route('/api/backup', methods=['GET'])
 def get_backup():
-    data = {'message': em.download_items_locally()}
+    downloaded_items = em.download_items_locally()
+    downloaded_items_formatted = {}
+    for each in downloaded_items:
+        print(each, downloaded_items[each])
+        downloaded_items_formatted[f'{each}'] = str(downloaded_items[each])
+        print(downloaded_items_formatted)
+    data = {'message': downloaded_items_formatted}
+    return jsonify(data)
+
+@app.route('/api/last_stats', methods=['GET'])
+def get_stats():
+    with open('stats.json') as j:
+        downloaded_items = json.load(j)
+    downloaded_items_formatted = {}
+    for each in downloaded_items:
+        print(each, downloaded_items[each])
+        downloaded_items_formatted[f'{each}'] = str(downloaded_items[each])
+        print(downloaded_items_formatted)
+    data = {'message': downloaded_items_formatted}
     return jsonify(data)
 
 if __name__ == '__main__':

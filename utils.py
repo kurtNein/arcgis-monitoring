@@ -14,7 +14,7 @@ import json
 
 class AutoMod:
     def __init__(self):
-        with open('stats.json') as f:
+        with open('creds.json') as f:
             # Load the JSON data into a Python dictionary
             data = json.load(f)
 
@@ -184,7 +184,7 @@ class AutoMod:
 
 class EnterpriseMod:
     def __init__(self):
-        with open('stats.json') as f:
+        with open('creds.json') as f:
             # Load the JSON data into a Python dictionary
             data = json.load(f)
 
@@ -201,8 +201,9 @@ class EnterpriseMod:
             print(e)
 
     def download_items_locally(self):
+        downloaded_items = {}
         sde_path = r"C:\Users\kcneinstedt\OneDrive - mercercounty.org\Documents\ArcGIS\Projects\Emergency Management\640gis01(4).sde"
-        local_gdb_path = os.path.join(os.getcwd(), "outputs", fr"egdb_backup_{time.strftime('%m-%d-%Y')}.gdb")
+        local_gdb_path = os.path.join(os.getcwd(), "outputs", fr"egdb_backup_{time.strftime('%H%M-_on_%m-%d-%Y')}.gdb")
 
         # Ensure output GDB exists
         if not arcpy.Exists(local_gdb_path):
@@ -218,11 +219,30 @@ class EnterpriseMod:
 
         # Copy standalone feature classes
         for fc in feature_classes:
-            source_fc = os.path.join(sde_path, fc)
-            dest_fc = os.path.join(local_gdb_path, fc)
-            print(f"Copying {fc}...")
-            arcpy.CopyFeatures_management(source_fc, dest_fc)
+            #if fc not in ['DBO.TreesGT5in_2019']:
+                #continue
+            try:
+                source_fc = os.path.join(sde_path, fc)
+                dest_fc = os.path.join(local_gdb_path, fc)
+                print(f"Copying {fc}...")
+                arcpy.CopyFeatures_management(source_fc, dest_fc)
+                downloaded_items[fc] = {
+                    'status': 'copied successfully',
+                    'timestamp': time.strftime('%H%M_on_%m-%d-%Y'),
+                    'error' : None,
+                    'path' : dest_fc
+                    }
+            except Exception as e:
+                downloaded_items[fc] = {
+                    'status': 'copying failed',
+                    'timestamp': time.strftime('%H%M_on_%m-%d-%Y'),
+                    'error' : str(e)
+                    }
 
+        with open('stats.json', 'w') as outfile:
+            json.dump(downloaded_items, outfile)
+
+        return downloaded_items
 
 if __name__ == '__main__':
     em = EnterpriseMod()
