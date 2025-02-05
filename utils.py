@@ -201,6 +201,7 @@ class EnterpriseMod:
         # Access the value you need
         self.username = data['egdb']['username']
         self.password = data['egdb']['password']
+        self.sde = data['sde']
         logging.info(f"Attempting login as {self.username}")
         print(self.username)
         try:
@@ -215,7 +216,7 @@ class EnterpriseMod:
 
     def download_items_locally(self):
         downloaded_items = {}
-        sde_path = r"C:\Users\kcneinstedt\OneDrive - mercercounty.org\Documents\ArcGIS\Projects\Emergency Management\640gis01(4).sde"
+        sde_path = self.sde
         local_gdb_path = os.path.join(os.getcwd(), "outputs", fr"egdb_backup_{time.strftime('%H%M-_on_%m-%d-%Y')}.gdb")
         logging.info(f"Attempting Enterprise GDB backup through {sde_path}.\nDestination: {local_gdb_path}")
         # Ensure output GDB exists
