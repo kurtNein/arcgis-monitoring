@@ -10,7 +10,15 @@ from datetime import datetime, timedelta
 import time
 import csv
 import json
+import logging
 
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    filename="activity.log"
+)
 
 class AutoMod:
     def __init__(self):
@@ -21,12 +29,14 @@ class AutoMod:
         # Access the value you need
         self.username = data['agol']['username']
         self.password = data['agol']['password']
+        logging.info(f"Attempting login as {self.username}")
         print(self.username)
         try:
 
             self.gis = GIS('home')
-
+            logging.info(f"Logged in to {self.gis} as {self.username}")
         except Exception as e:
+            logging.error(f"Could not log in to {self.gis} as {self.username}.\nError:{e}")
             print(e)
 
         self._output_csv = ''
@@ -191,22 +201,26 @@ class EnterpriseMod:
         # Access the value you need
         self.username = data['egdb']['username']
         self.password = data['egdb']['password']
+        logging.info(f"Attempting login as {self.username}")
         print(self.username)
         try:
+            logging.info(f"Attempting login as {self.username}")
             self.gis = GIS('https://maps.mercercounty.org/portal', self.username, self.password)
             print(f'Logged in as {self.gis.properties.user.username}')
-
+            logging.info(f'Logged in to portal as {self.username}')
 
         except Exception as e:
+            logging.error(f"Could not log in to portal as {self.username}\nError:{e}")
             print(e)
 
     def download_items_locally(self):
         downloaded_items = {}
         sde_path = r"C:\Users\kcneinstedt\OneDrive - mercercounty.org\Documents\ArcGIS\Projects\Emergency Management\640gis01(4).sde"
         local_gdb_path = os.path.join(os.getcwd(), "outputs", fr"egdb_backup_{time.strftime('%H%M-_on_%m-%d-%Y')}.gdb")
-
+        logging.info(f"Attempting Enterprise GDB backup through {sde_path}.\nDestination: {local_gdb_path}")
         # Ensure output GDB exists
         if not arcpy.Exists(local_gdb_path):
+            logging.warning(f'Local file geodatabase does not exist. Creating .gdb in directory.')
             arcpy.CreateFileGDB_management(os.path.dirname(local_gdb_path), os.path.basename(local_gdb_path))
 
         # Set workspace to the Enterprise GDB
@@ -214,6 +228,7 @@ class EnterpriseMod:
 
         # Get feature classes
         feature_classes = arcpy.ListFeatureClasses()
+        logging.info(f'Found {len(feature_classes)} feature classes through .sde file.')
         print(feature_classes)
         datasets = arcpy.ListDatasets(feature_type="Feature") or []
 
@@ -222,6 +237,7 @@ class EnterpriseMod:
             #if fc not in ['DBO.TreesGT5in_2019']:
                 #continue
             try:
+                logging.info(f'Copying {fc.__str__()}...')
                 source_fc = os.path.join(sde_path, fc)
                 dest_fc = os.path.join(local_gdb_path, fc)
                 print(f"Copying {fc}...")
@@ -232,17 +248,20 @@ class EnterpriseMod:
                     'error' : None,
                     'path' : dest_fc
                     }
+                logging.info(f'{fc.__str__()} copied successfully.')
             except Exception as e:
                 downloaded_items[fc] = {
                     'status': 'copying failed',
                     'timestamp': time.strftime('%H%M_on_%m-%d-%Y'),
                     'error' : str(e)
                     }
-
+                logging.error(f'Failed to copy {fc.title}\nError: {e}')
+        logging.info(f'Updating "stats.json" with status of {len(downloaded_items)} items.')
         with open('stats.json', 'w') as outfile:
             json.dump(downloaded_items, outfile)
 
         return downloaded_items
+
 
 if __name__ == '__main__':
     em = EnterpriseMod()

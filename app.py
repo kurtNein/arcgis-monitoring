@@ -1,9 +1,12 @@
+import logging
+
 from flask import Flask, render_template, jsonify, request
 from utils import AutoMod, EnterpriseMod
 from smtplib import SMTP
 import datetime
 import json
 import requests
+
 
 app = Flask(__name__)
 
@@ -42,6 +45,7 @@ def portal():
 @app.route('/api/data', methods=['GET'])
 def get_data():
     # Example of sending some data from Python to the frontend
+
     unmapped_services_list = am.get_services_in_no_web_maps()
     data_dict = {}
     for service in unmapped_services_list:
@@ -58,6 +62,7 @@ def get_user():
 @app.route('/api/status', methods=['GET'])
 def get_status():
     # Example data for "Status"
+    logging.info(f'Sending http request to "maps.mercercounty.org/portal", "pip.mercer')
     portal_status = requests.get('https://maps.mercercounty.org/portal').status_code
     pip_status = requests.get('http://pip.mercercounty.org/signin').status_code
     data = {'message':
