@@ -1,11 +1,35 @@
 from flask import Flask, render_template, jsonify, request
 from utils import AutoMod, EnterpriseMod
+from smtplib import SMTP
+import datetime
 import json
+import requests
 
 app = Flask(__name__)
 
 am = AutoMod()
 em = EnterpriseMod()
+
+def send_email():
+    DEBUG_LEVEL = 0
+
+    smtp = SMTP()
+    smtp.set_debuglevel(DEBUG_LEVEL)
+    smtp.connect('YOUR.MAIL.SERVER', 26)
+    smtp.login('USERNAME@DOMAIN', 'PASSWORD')
+
+    from_addr = "John Doe <john@doe.net>"
+    to_addr = "foo@bar.com"
+
+    subj = "hello"
+    date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    message_text = "Hello\nThis is a mail from your server\n\nBye\n"
+
+    msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % (from_addr, to_addr, subj, date, message_text)
+
+    smtp.sendmail(from_addr, to_addr, msg)
+    smtp.quit()
 
 @app.route('/')
 def index():
@@ -34,7 +58,14 @@ def get_user():
 @app.route('/api/status', methods=['GET'])
 def get_status():
     # Example data for "Status"
-    data = {'message': {'Status': 'Everything is running smoothly'}}
+    portal_status = requests.get('https://maps.mercercounty.org/portal').status_code
+    pip_status = requests.get('http://pip.mercercounty.org/signin').status_code
+    data = {'message':
+        {
+        'maps.mercercounty.org/portal': f"Response: {str(portal_status)}",
+        'pip.mercercounty.org/signin': f"Response: {str(pip_status)}"
+        }
+    }
     return jsonify(data)
 
 @app.route('/api/backup', methods=['GET'])
