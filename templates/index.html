@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Mapping Monitoring Interface</title>
+    <title>EMI - Enterprise Monitoring Interface</title>
     <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
     <header class="header">
         <img src="./static/gis-seal.png" width="120" height="120" style="vertical-align:middle;horizontal-align:left;padding-bottom:16px;padding-right:2em;"/>
         <div style="display:inline-block;">
-            <h1> Enterprise Mapping Monitoring Interface</h1>
+            <h1> Enterprise Monitoring Interface</h1>
         </div>
     </header>
     <main class="main-content">
@@ -19,20 +19,21 @@
             <div class="one-third">
                 <section class="card" style="min-height: 50em;">
                     <h2>Menu</h2>
-                    <a href="./">ArcGIS Online Tools</a><br>
-                    <a href="portal.html">Enterprise Portal</a>
+                    <a href="./">ArcGIS Tools</a><br>
+                    <a href="records.html">View Records</a>
                 </section>
             </div>
             <div class="two-thirds">
                 <section class="card">
-                    <h2>ArcGIS Online Tools</h2>
-                    <p>One-click tools to check ArcGIS functionalities.</p>
+                    <h2>ArcGIS Tools</h2>
+                    <p>One-click tools to check ArcGIS functionalities or backup data.</p>
                     <!-- Multiple buttons for different fetches -->
-                    <button class="btn-primary" id="fetch-list">AGOL services not in Web Maps</button>
-                    <button class="btn-primary" id="fetch-user">Inactive AGOL users - 60 days</button>
-                    <button class="btn-primary" id="fetch-status">Get Portal Status</button>
                     <button class="btn-primary" id="backup-agol">Backup EGDB</button>
                     <button class="btn-primary" id="last-backup">Show Last Backup Log</button>
+                    <button class="btn-primary" id="fetch-status">Get Portal Status</button>
+                    <button class="btn-primary" id="fetch-list">AGOL layers not in Web Maps</button>
+                    <button class="btn-primary" id="fetch-user">Inactive AGOL users - 60 days</button>
+
                 </section>
                 <div class="output" id="output"></div>
 

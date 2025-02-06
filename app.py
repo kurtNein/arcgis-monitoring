@@ -1,16 +1,19 @@
 import logging
-
 from flask import Flask, render_template, jsonify, request
+from sqlalchemy.sql.type_api import NULLTYPE
+
 from utils import AutoMod, EnterpriseMod
 from smtplib import SMTP
 import datetime
 import json
 import requests
 
+logging.info('Initialized app.py')
 
 app = Flask(__name__)
 
 am = AutoMod()
+
 em = EnterpriseMod()
 
 def send_email():
@@ -38,9 +41,9 @@ def send_email():
 def index():
     return render_template('index.html')
 
-@app.route('/portal.html')
-def portal():
-    return render_template('portal.html')
+@app.route('/records.html')
+def records():
+    return render_template('records.html')
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
@@ -62,7 +65,7 @@ def get_user():
 @app.route('/api/status', methods=['GET'])
 def get_status():
     # Example data for "Status"
-    logging.info(f'Sending http request to "maps.mercercounty.org/portal", "pip.mercer')
+    logging.info(f'Sending http request to "maps.mercercounty.org/portal", "pip.mercercounty.org"')
     portal_status = requests.get('https://maps.mercercounty.org/portal').status_code
     pip_status = requests.get('http://pip.mercercounty.org/signin').status_code
     data = {'message':
@@ -89,12 +92,29 @@ def get_stats():
     with open('stats.json') as j:
         downloaded_items = json.load(j)
     downloaded_items_formatted = {}
-    for each in downloaded_items:
-        print(each, downloaded_items[each])
-        downloaded_items_formatted[f'{each}'] = str(downloaded_items[each])
+    for each in downloaded_items['egdb backup']:
+        print(each, downloaded_items['egdb backup'][each])
+        downloaded_items_formatted[f'{each}'] = str(downloaded_items['egdb backup'][each])
         print(downloaded_items_formatted)
     data = {'message': downloaded_items_formatted}
     return jsonify(data)
+
+@app.route('/api/dashboard', methods=['GET'])
+def get_dashboard():
+    with open('stats.json') as j:
+        downloaded_items = json.load(j)
+        print(downloaded_items)
+    total_items = len(downloaded_items['egdb backup'])
+    failures = 0
+    for item in downloaded_items['egdb backup']:
+        if downloaded_items['egdb backup'][item]['error']:
+            failures += 1
+    successes = total_items-failures
+    data = {'message': {'Failures last backup': failures,
+                        'Successes last backup': successes,
+                        'Last EGDB backup': downloaded_items['last backup completed']}}
+    return jsonify(data)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
