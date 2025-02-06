@@ -101,12 +101,14 @@ def get_stats():
 
 @app.route('/api/dashboard', methods=['GET'])
 def get_dashboard():
+    # This is just for the default data for records.html.
     with open('stats.json') as j:
         downloaded_items = json.load(j)
         print(downloaded_items)
     total_items = len(downloaded_items['egdb backup'])
     failures = 0
     for item in downloaded_items['egdb backup']:
+        # 'error' value is null in .json if it copied successfully, otherwise it should have the error text
         if downloaded_items['egdb backup'][item]['error']:
             failures += 1
     successes = total_items-failures
