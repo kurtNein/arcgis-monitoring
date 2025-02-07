@@ -51,11 +51,11 @@ document.getElementById('fetch-status').addEventListener('click', async function
 });
 
 // Async function for "Get Status" button
-document.getElementById('backup-agol').addEventListener('click', async function() {
-    await fetchData('/api/backup', 'output');
+document.getElementById('backup-egdb').addEventListener('click', async function() {
+    await fetchData('/api/backup_egdb', 'output');
 });
 
 // Async function for "Get Status" button
-document.getElementById('last-backup').addEventListener('click', async function() {
-    await fetchData('/api/last_stats', 'output');
+document.getElementById('backup-agol').addEventListener('click', async function() {
+    await fetchData('/api/backup_agol', 'output');
 });

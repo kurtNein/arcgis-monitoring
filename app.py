@@ -1,7 +1,5 @@
 import logging
 from flask import Flask, render_template, jsonify, request
-from sqlalchemy.sql.type_api import NULLTYPE
-
 from utils import AutoMod, EnterpriseMod
 from smtplib import SMTP
 import datetime
@@ -68,17 +66,30 @@ def get_status():
     logging.info(f'Sending http request to "maps.mercercounty.org/portal", "pip.mercercounty.org"')
     portal_status = requests.get('https://maps.mercercounty.org/portal').status_code
     pip_status = requests.get('http://pip.mercercounty.org/signin').status_code
+    agol_status = requests.get('https://mercernj.maps.arcgis.com/home/index.html').status_code
     data = {'message':
         {
         'maps.mercercounty.org/portal': f"Response: {str(portal_status)}",
-        'pip.mercercounty.org/signin': f"Response: {str(pip_status)}"
+        'pip.mercercounty.org/signin': f"Response: {str(pip_status)}",
+        'mercernj.maps.arcgis.com/home': f"Response: {str(agol_status)}"
         }
     }
     return jsonify(data)
 
-@app.route('/api/backup', methods=['GET'])
-def get_backup():
+@app.route('/api/backup_egdb', methods=['GET'])
+def backup_egdb():
     downloaded_items = em.download_items_locally()
+    downloaded_items_formatted = {}
+    for each in downloaded_items['egdb backup']:
+        print(each, downloaded_items['egdb backup'][each])
+        downloaded_items_formatted[f'{each}'] = str(downloaded_items['egdb backup'][each])
+        print(downloaded_items_formatted)
+    data = {'message': downloaded_items_formatted}
+    return jsonify(data)
+
+@app.route('/api/backup_agol', methods=['GET'])
+def backup_agol():
+    downloaded_items = am.download_items_locally()
     downloaded_items_formatted = {}
     for each in downloaded_items:
         print(each, downloaded_items[each])
@@ -114,7 +125,13 @@ def get_dashboard():
     successes = total_items-failures
     data = {'message': {'Failures last backup': failures,
                         'Successes last backup': successes,
-                        'Last EGDB backup': downloaded_items['last backup completed']}}
+                        'Date of last backup': downloaded_items['last backup completed']}}
+    return jsonify(data)
+
+@app.route('/api/sde_users', methods=['GET'])
+def list_sde_users():
+    users = em.list_users()
+    data = {'message': users}
     return jsonify(data)
 
 
