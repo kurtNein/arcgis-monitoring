@@ -23,7 +23,7 @@ logging.basicConfig(
 class AutoMod:
     def __init__(self):
         with open('creds.json') as f:
-            # Load the JSON data into a Python dictionary
+            # Store login credentials in another unversioned file.
             data = json.load(f)
 
         # Access the value you need
@@ -152,7 +152,7 @@ class AutoMod:
 
             # Loop through each item and if equal to Feature service then download it
             for item in items:
-                if item.type and item.id in ['6bb0b2235eb242c7b1163b5d5245dba3','b7649193f7ee4f1ba05df393c5bbe449']:
+                #if item.type and item.id in ['6bb0b2235eb242c7b1163b5d5245dba3','b7649193f7ee4f1ba05df393c5bbe449']:
                     try:
                         print(f"Working on {item.title}...")
                         result = item.export('sample {}'.format(item.title), download_format)
@@ -195,10 +195,10 @@ class AutoMod:
 class EnterpriseMod:
     def __init__(self):
         with open('creds.json') as f:
-            # Load the JSON data into a Python dictionary
+            # Store login credentials in another unversioned file. Access them through this.
             data = json.load(f)
 
-        # Access the value you need
+        # Access the values from json
         self.username = data['egdb']['username']
         self.password = data['egdb']['password']
         self.sde = data['sde']
@@ -236,8 +236,8 @@ class EnterpriseMod:
 
         # Copy standalone feature classes
         for fc in feature_classes:
-            if fc not in ['DBO.TreesGT5in_2019']:
-                continue
+            #if fc not in ['DBO.TreesGT5in_2019']:
+                #continue
             try:
                 logging.info(f'Copying {fc.__str__()}...')
                 source_fc = os.path.join(sde_path, fc)
@@ -248,7 +248,7 @@ class EnterpriseMod:
                     'status': 'copied successfully',
                     'timestamp': time.strftime('%H%M_on_%m-%d-%Y'),
                     'error' : None,
-                    'path' : dest_fc
+                    'path' : dest_fc.split('\\')[-2:]
                     }
                 logging.info(f'{fc.__str__()} copied successfully.')
             except Exception as e:
@@ -267,7 +267,13 @@ class EnterpriseMod:
 
         return downloaded_items
 
+    def list_users(self):
+        users_tuple = arcpy.ListUsers(self.sde)
+        users = {}
+        for user in users_tuple:
+            users[user.ID] = (user.Name, user.ClientName, user.ConnectionTime, user.IsDirectConnection)
+        return users
+
 
 if __name__ == '__main__':
     em = EnterpriseMod()
-    em.download_items_locally()

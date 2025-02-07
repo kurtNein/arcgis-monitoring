@@ -1,7 +1,7 @@
 /* Base Styles */
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     background-color: #F4F4E1;
     color: #5F5F5F;
     line-height: 1.6;
@@ -47,6 +47,11 @@ body {
     width: 80%;
 }
 
+.one-half {
+    width: 50%
+
+}
+
 h1 {
     color: #F4F4E1;
 }
@@ -65,11 +70,11 @@ h2 {
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
-    width: fit-content;
+    width: 18em;
 }
 
 .btn-primary:hover {
-    background-color: #A49A4E;
+    background-color: #a59c56;
 }
 
 .btn-dismiss {
