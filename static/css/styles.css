@@ -19,9 +19,9 @@ body {
 /* Main Content */
 .main-content {
     padding: 3em;
-    padding-left: 15em;
-    padding-right: 15em;
-    min-height:70em;
+    padding-left: 14em;
+    padding-right: 14em;
+    min-height:fit-content;
 }
 
 .card {
@@ -58,6 +58,16 @@ h1 {
 
 h2 {
     color: #3B5F3B;
+}
+
+a {
+    color: #567033;
+    line-height: 2;
+    
+}
+
+a:hover {
+    color: #4CAF50;
 }
 
 /* Buttons */
@@ -112,6 +122,6 @@ h2 {
     background-color: #3B5F3B;
     color: #F4F4E1;
     text-align: center;
-    padding: 1em 0;
+    padding: 1.5em 0;
     margin-top: 2em;
 }

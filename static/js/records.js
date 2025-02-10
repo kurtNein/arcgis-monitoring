@@ -48,7 +48,7 @@ async function yourFunction(){
 
     await fetchData('/api/dashboard', 'output2', 'response2', 'Status of last EGDB backup');
     await fetchData('/api/status', 'output3', 'response3', `Status of web adaptors as of ${hours}:${minutes}:${seconds}`);
-    await fetchData('/api/last_stats', 'output4', 'response4', 'Current users in .sde');
+    await fetchData('/api/last_stats', 'output4', 'response4', 'Details of last EGDB backup');
     await fetchData('/api/sde_users', 'output5', 'response5', 'Current users in .sde');
 
     setTimeout(yourFunction, 15_000);

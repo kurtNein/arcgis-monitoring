@@ -277,3 +277,4 @@ class EnterpriseMod:
 
 if __name__ == '__main__':
     em = EnterpriseMod()
+    em.download_items_locally()
