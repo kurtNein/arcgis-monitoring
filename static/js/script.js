@@ -46,11 +46,6 @@ document.getElementById('fetch-user').addEventListener('click', async function()
 });
 
 // Async function for "Get Status" button
-document.getElementById('fetch-status').addEventListener('click', async function() {
-    await fetchData('/api/status', 'output');
-});
-
-// Async function for "Get Status" button
 document.getElementById('backup-egdb').addEventListener('click', async function() {
     await fetchData('/api/backup_egdb', 'output');
 });
