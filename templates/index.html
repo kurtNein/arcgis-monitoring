@@ -13,14 +13,19 @@
         <div style="display:inline-block;">
             <h1> Enterprise Monitoring Interface</h1>
         </div>
+
     </header>
     <main class="main-content">
         <div class="container">
             <div class="one-third">
                 <section class="card" style="min-height: 50em;">
                     <h2>Navigation</h2>
-                    <a href="./">ArcGIS Tools</a><br>
-                    <a href="records.html">View Records</a>
+                    <a href="./"><button class="btn-current-tab" style="display:block; width:100%">ArcGIS Tools</button></a>
+                    <a href="records.html"><button class="btn-primary" style="display:block; width:100%">View Records</button></a>
+                    <h2>External</h2>
+                    <a href="https://640gis01.mercer.ad:6443/arcgis/manager/#f=Assets"><button class="btn-primary" style="display:block; width:100%">Server Manager</button></a>
+                    <a href="https://mercernj.maps.arcgis.com/home/index.html"><button class="btn-primary" style="display:block; width:100%">ArcGIS Online</button></a>
+                    <a href="https://maps.mercercounty.org/portal"><button class="btn-primary" style="display:block; width:100%">ArcGIS Portal</button></a>
                 </section>
             </div>
             <div class="two-thirds">
@@ -28,13 +33,14 @@
                     <h2>ArcGIS Tools</h2>
                     <p>One-click tools to check ArcGIS functionalities or backup data.</p>
                     <!-- Multiple buttons for different fetches -->
-                    <button class="btn-primary" id="backup-egdb">Backup EGDB</button>
-                    <button class="btn-primary" id="backup-agol">Backup AGOL</button>
+                    <button class="btn-primary" id="backup-egdb">Backup EGDB layers</button>
+                    <button class="btn-primary" id="backup-agol">Backup AGOL layers</button>
                     <!--button class="btn-primary" id="fetch-status">Get Portal Status</button-->
-                    <button class="btn-primary" id="fetch-list">AGOL layers not in Web Maps</button>
-                    <button class="btn-primary" id="fetch-user">Inactive AGOL users - 60 days</button>
+                    <button class="btn-primary" id="fetch-list">List unused layers</button>
+                    <button class="btn-primary" id="fetch-user">List inactive users</button>
 
                 </section>
+                <div class="alert info" id="test-alert">Last site update: 2/10/2025<button class="btn-dismiss" id="dismiss">Dismiss</button></div>
                 <div class="output" id="output"></div>
 
                 <section class="card">

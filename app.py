@@ -1,4 +1,6 @@
 import logging
+
+from arcpy.management import DowngradeAttachments
 from flask import Flask, render_template, jsonify, request
 from utils import AutoMod, EnterpriseMod
 from smtplib import SMTP
@@ -9,10 +11,6 @@ import requests
 logging.info('Initialized app.py')
 
 app = Flask(__name__)
-
-am = AutoMod()
-
-em = EnterpriseMod()
 
 def send_email():
     DEBUG_LEVEL = 0
@@ -35,6 +33,15 @@ def send_email():
     smtp.sendmail(from_addr, to_addr, msg)
     smtp.quit()
 
+def handle_timeout(url: str, timeout: int, message: str) -> str:
+    status = message
+    try:
+        status = requests.get(url, timeout=timeout).status_code
+    except TimeoutError as e:
+        logging.error(e)
+    finally:
+        return str(status)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -45,8 +52,7 @@ def records():
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
-    # Example of sending some data from Python to the frontend
-
+    am = AutoMod()
     unmapped_services_list = am.get_services_in_no_web_maps()
     data_dict = {}
     for service in unmapped_services_list:
@@ -56,6 +62,7 @@ def get_data():
 
 @app.route('/api/user', methods=['GET'])
 def get_user():
+    am = AutoMod()
     inactive_users = am.get_inactive_users(return_type=list)
     data = {'message': inactive_users}
     return jsonify(data)
@@ -64,9 +71,9 @@ def get_user():
 def get_status():
     # Example data for "Status"
     logging.info(f'Sending http request to "maps.mercercounty.org/portal", "pip.mercercounty.org"')
-    portal_status = requests.get('https://maps.mercercounty.org/portal').status_code
-    pip_status = requests.get('http://pip.mercercounty.org/signin').status_code
-    agol_status = requests.get('https://mercernj.maps.arcgis.com/home/index.html').status_code
+    portal_status = handle_timeout('https://maps.mercercounty.org/portal',5, 'Timed out')
+    pip_status = handle_timeout('http://pip.mercercounty.org/signin', 5, 'Timed out')
+    agol_status = requests.get('https://mercernj.maps.arcgis.com/home/index.html', timeout=5).status_code
     data = {'message':
         {
         'maps.mercercounty.org/portal': f"Response: {str(portal_status)}",
@@ -78,6 +85,7 @@ def get_status():
 
 @app.route('/api/backup_egdb', methods=['GET'])
 def backup_egdb():
+    em = EnterpriseMod()
     downloaded_items = em.download_items_locally()
     downloaded_items_formatted = {}
     for each in downloaded_items['egdb backup']:
@@ -89,6 +97,7 @@ def backup_egdb():
 
 @app.route('/api/backup_agol', methods=['GET'])
 def backup_agol():
+    am = AutoMod()
     downloaded_items = am.download_items_locally()
     downloaded_items_formatted = {}
     for each in downloaded_items:
@@ -130,6 +139,10 @@ def get_dashboard():
 
 @app.route('/api/sde_users', methods=['GET'])
 def list_sde_users():
+    try:
+        em = EnterpriseMod()
+    except Exception as e:
+        return jsonify({'message': e})
     users = em.list_users()
     data = {'message': users}
     return jsonify(data)

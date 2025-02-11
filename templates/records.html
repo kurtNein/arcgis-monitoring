@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMI - Enterprise Monitoring Interface</title>
+    <title>EMI - View Records</title>
     <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body>
@@ -19,13 +19,18 @@
             <div class="one-third">
                 <section class="card" style="min-height: 100%;">
                     <h2>Navigation</h2>
-                    <a href="./">ArcGIS Tools</a><br>
-                    <a href="records.html">View Records</a>
+                    <a href="./"><button class="btn-primary" style="display:block; width:100%   ">ArcGIS Tools</button></a>
+                    <a href="records.html"><button class="btn-current-tab" style="display:block; width:100%">View Records</button></a>
+                    <h2>External</h2>
+                    <a href="https://640gis01.mercer.ad:6443/arcgis/manager/#f=Assets"><button class="btn-primary" style="display:block; width:100%">Server Manager</button></a>
+                    <a href="https://mercernj.maps.arcgis.com/home/index.html"><button class="btn-primary" style="display:block; width:100%">ArcGIS Online</button></a>
+                    <a href="https://maps.mercercounty.org/portal"><button class="btn-primary" style="display:block; width:100%">ArcGIS Portal</button></a>
                 </section>
+
             </div>
             <div class="two-thirds">
                 <section class="card">
-                    <h2>Dashboard</h2>
+                    <h2>View Records</h2>
                     <p>At-a-glance view of services, statuses, and users.</p>
                     <!-- Multiple buttons for different fetches -->
                     <a href="../activity.log" download="activity.log">

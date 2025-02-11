@@ -34,6 +34,14 @@ async function fetchData(url, id) {
     }
 }
 
+function dismiss(id) {
+    updateOutput('','',id)
+}
+
+// Async function for "Get List Count" button
+document.getElementById('dismiss').addEventListener('click', async function() {
+    dismiss('test-alert');
+});
 
 // Async function for "Get List Count" button
 document.getElementById('fetch-list').addEventListener('click', async function() {
