@@ -30,7 +30,7 @@ body {
     padding: 1.5em;
     margin-bottom: 1em;
     border-radius: 5px;
-    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
 }
 
 .container {
@@ -63,6 +63,7 @@ h2 {
 a {
     color: #567033;
     line-height: 2;
+    text-decoration: none;
     
 }
 

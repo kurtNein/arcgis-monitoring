@@ -13,10 +13,10 @@ function formatDictAsHTML(dict) {
 }
 
 // Async function to fetch data
-async function fetchData(url, id_output, id_response, output_message) {
+async function fetchData(url, id_output, id_response, output_message, loading_message) {
     try {
         // Set to "Loading..." state
-        updateOutput('alert info', 'Loading...', id_output);
+        updateOutput('alert info', loading_message, id_output);
         updateOutput('', '', id_response)
 
         // Wait for the fetch request to complete
@@ -46,11 +46,11 @@ async function yourFunction(){
     let minutes = formatTime(now.getMinutes());
     let seconds = formatTime(now.getSeconds());
 
-    await fetchData('/api/dashboard', 'output2', 'response2', 'Status of last EGDB backup');
-    await fetchData('/api/status', 'output3', 'response3', `Status of web adaptors as of ${hours}:${minutes}:${seconds}`);
-    await fetchData('/api/last_stats', 'output4', 'response4', 'Details of last EGDB backup');
-    await fetchData('/api/sde_users', 'output5', 'response5', 'Current users in .sde');
-    setTimeout(yourFunction, 15_000);
+    await fetchData('/api/dashboard', 'output2', 'response2', 'Status of last EGDB backup', 'Fetching last EGDB details...');
+    await fetchData('/api/status', 'output3', 'response3', `Status of web adaptors as of ${hours}:${minutes}:${seconds}`, 'Getting http response codes...');
+    await fetchData('/api/last_stats', 'output4', 'response4', 'Details of last EGDB backup', 'Fetching feature layers of last EGDB backup...');
+    await fetchData('/api/sde_users', 'output5', 'response5', 'Current users in .sde', 'Counting directly connected users on EGDB...');
+    setTimeout(yourFunction, 10_000);
 }
 
 yourFunction();

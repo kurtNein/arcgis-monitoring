@@ -1,12 +1,13 @@
 import logging
-
 from arcpy.management import DowngradeAttachments
 from flask import Flask, render_template, jsonify, request
-from utils import AutoMod, EnterpriseMod
 from smtplib import SMTP
 import datetime
 import json
 import requests
+
+
+from utils import AutoMod, EnterpriseMod
 
 logging.info('Initialized app.py')
 
@@ -71,9 +72,9 @@ def get_user():
 def get_status():
     # Example data for "Status"
     logging.info(f'Sending http request to "maps.mercercounty.org/portal", "pip.mercercounty.org"')
-    portal_status = handle_timeout('https://maps.mercercounty.org/portal',5, 'Timed out')
-    pip_status = handle_timeout('http://pip.mercercounty.org/signin', 5, 'Timed out')
-    agol_status = requests.get('https://mercernj.maps.arcgis.com/home/index.html', timeout=5).status_code
+    portal_status = handle_timeout('https://maps.mercercounty.org/portal',3, 'Timed out')
+    pip_status = handle_timeout('http://pip.mercercounty.org/signin', 3, 'Timed out')
+    agol_status = requests.get('https://mercernj.maps.arcgis.com/home/index.html', timeout=3).status_code
     data = {'message':
         {
         'maps.mercercounty.org/portal': f"Response: {str(portal_status)}",
