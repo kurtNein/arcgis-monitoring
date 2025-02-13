@@ -1,6 +1,6 @@
 import logging
 from arcpy.management import DowngradeAttachments
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_file
 from smtplib import SMTP
 import datetime
 import json
@@ -148,6 +148,11 @@ def list_sde_users():
     data = {'message': users}
     return jsonify(data)
 
+@app.route('/download', methods=['GET', 'POST'])
+def download_file():
+    print(True)
+    path = r"C:\Users\kcneinstedt\PycharmProjects\arcgis-monitoring\activity.log"
+    return send_file(path, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
