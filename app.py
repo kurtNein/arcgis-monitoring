@@ -151,8 +151,12 @@ def list_sde_users():
 @app.route('/download', methods=['GET', 'POST'])
 def download_file():
     print(True)
-    path = r"C:\Users\kcneinstedt\PycharmProjects\arcgis-monitoring\activity.log"
-    return send_file(path, as_attachment=True)
+    try:
+        path = r"C:\Users\kcneinstedt\PycharmProjects\arcgis-monitoring\activity.log"
+        return send_file(path, as_attachment=True)
+    except Exception as e:
+        logging.error(e)
+        return jsonify({'message':{'Error': f'{e}'}})
 
 if __name__ == '__main__':
     app.run(debug=True)
