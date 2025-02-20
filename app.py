@@ -57,7 +57,7 @@ def get_data():
     unmapped_services_list = am.get_services_in_no_web_maps()
     data_dict = {}
     for service in unmapped_services_list:
-        data_dict[service.title] = service.owner
+        data_dict[service.title] = service.owner, service.id
     data = {'message': data_dict}
     return jsonify(data)
 
