@@ -140,7 +140,31 @@ class AutoMod:
         new_time_struct = new_datetime.timetuple()
         return new_time_struct
 
-    def download_items_locally(self, download_format='File Geodatabase'):
+    def download_item(self, item, download_format):
+
+        try:
+            print(f"Working on {item.title}...")
+
+            # Creates another AGOL item in the same portal in file geodatabase (.gdb) format.
+            result = item.export('sample {}'.format(item.title), download_format)
+            last_name = self.gis.properties.user.lastName
+            process_time = time.strftime('%m-%d-%Y', time.localtime())
+
+            # Download the AGOL .gdb that was just created, not the original item.
+            result.download(f"outputs//AGOL_{last_name}__{process_time}")
+            print(f"Processed {item.title}")
+
+            # The AGOL .gdb is still there taking up space in the portal, so clean it up. Leave original layer intact.
+            result.delete()
+
+        except Exception as e:
+            print(e)
+            return None
+
+        return item.id, item.title, item.owner
+
+
+    def download_items_locally(self, download_format='File Geodatabase', ids_to_download=None):
         arcpy.AddMessage("Logged in as " + str(self.gis.properties.user.username))
         downloaded_items = {}
         try:
@@ -149,23 +173,21 @@ class AutoMod:
             for item in items:
                 print(item.id, item.title, item.owner)
             print(f"Search found {len(items)} items in this portal available.")
-
+            if ids_to_download:
             # Loop through each item and if equal to Feature service then download it
-            for item in items:
-                #if item.type and item.id in ['6bb0b2235eb242c7b1163b5d5245dba3','b7649193f7ee4f1ba05df393c5bbe449']:
-                    try:
-                        print(f"Working on {item.title}...")
-                        result = item.export('sample {}'.format(item.title), download_format)
-                        result.download(
-                            f"AGOL_{self.gis.properties.user.lastName}__{time.strftime('%m-%d-%Y', time.localtime())}")
-                        print(f"Processed {item.title}")
-                        downloaded_items[item.id] = [item.title, item.owner]
-                        # Delete the item after it downloads to save on space
-                        result.delete()
+                for item in items:
+                    if item.id in ids_to_download:
+                        item_downloaded = self.download_item(item,download_format)
+                        if item_downloaded is not None:
+                            downloaded_items[item_downloaded[0]] = [item_downloaded[1], item_downloaded[2]]
 
-                    except Exception as e:
-                        print(e)
-                        continue
+                return downloaded_items
+
+            for item in items:
+                item_downloaded = self.download_item(item, download_format)
+                if item_downloaded is not None:
+                    downloaded_items[item_downloaded[0]] = [item_downloaded[1], item_downloaded[2]]
+
         except Exception as e:
             print(e)
         return downloaded_items
@@ -180,7 +202,7 @@ class AutoMod:
             try:
                 item.reassign_to(transfer_to_user)
             except Exception as e:
-                print("Item may have been already assigned to the user.")
+                print(f"{e}\nItem may have been already assigned to the user.")
 
         for folder in folders:
             self.gis.content.create_folder(folder['title'], transfer_to_user)

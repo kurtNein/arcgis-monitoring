@@ -57,7 +57,7 @@ def get_data():
     unmapped_services_list = am.get_services_in_no_web_maps()
     data_dict = {}
     for service in unmapped_services_list:
-        data_dict[service.title] = service.owner
+        data_dict[service.title] = service.owner, service.id
     data = {'message': data_dict}
     return jsonify(data)
 
@@ -151,8 +151,12 @@ def list_sde_users():
 @app.route('/download', methods=['GET', 'POST'])
 def download_file():
     print(True)
-    path = r"C:\Users\kcneinstedt\PycharmProjects\arcgis-monitoring\activity.log"
-    return send_file(path, as_attachment=True)
+    try:
+        path = r"C:\Users\kcneinstedt\PycharmProjects\arcgis-monitoring\activity.log"
+        return send_file(path, as_attachment=True)
+    except Exception as e:
+        logging.error(e)
+        return jsonify({'message':{'Error': f'{e}'}})
 
 if __name__ == '__main__':
     app.run(debug=True)
