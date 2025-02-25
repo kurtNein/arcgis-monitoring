@@ -1,0 +1,29 @@
+{
+  "egdb" :
+  {
+    "username": "enterprise_user",
+    "password": "12345"
+},
+
+  "agol" :
+  {
+    "username": "agol_user",
+    "password": "12345"
+  },
+
+  "smtp" :
+  {
+    "username": "user@email.com",
+    "password": "12345",
+    "domain": "email.com"
+  },
+
+  "sde": "path/connection_file.sde",
+
+  "domains":
+  {
+    "portal_domain": "https://maps.mercercounty.org/portal",
+    "pip_domain": "https://pip.mercercounty.org/signin",
+    "agol_domain": "https://mercernj.maps.arcgis.com/home/index.html"
+  }
+}

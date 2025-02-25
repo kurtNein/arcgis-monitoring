@@ -1,11 +1,10 @@
 import logging
 from arcpy.management import DowngradeAttachments
-from flask import Flask, render_template, jsonify, request, send_file
+from flask import Flask, render_template, jsonify, send_file
 from smtplib import SMTP
 import datetime
 import json
 import requests
-
 
 from utils import AutoMod, EnterpriseMod
 
@@ -45,14 +44,17 @@ def handle_timeout(url: str, timeout: int, message: str) -> str:
 
 @app.route('/')
 def index():
+    # Home page endpoint. One-off procedures can be executed from UI on this page
     return render_template('index.html')
 
 @app.route('/records.html')
 def records():
+    # Records page endpoint. Dashboard of common stats used when monitoring or troubleshooting.
     return render_template('records.html')
 
 @app.route('/api/data', methods=['GET'])
 def get_data():
+    # One-click call to class method which displays potentially unused feature services in the UI.
     am = AutoMod()
     unmapped_services_list = am.get_services_in_no_web_maps()
     data_dict = {}
@@ -63,6 +65,7 @@ def get_data():
 
 @app.route('/api/user', methods=['GET'])
 def get_user():
+    # One-click call to class method which displays potentially unused AGOL user licenses.
     am = AutoMod()
     inactive_users = am.get_inactive_users(return_type=list)
     data = {'message': inactive_users}
@@ -70,18 +73,20 @@ def get_user():
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
-    # Example data for "Status"
-    logging.info(f'Sending http request to "maps.mercercounty.org/portal", "pip.mercercounty.org"')
-    portal_status = handle_timeout('https://maps.mercercounty.org/portal',3, 'Timed out')
-    pip_status = handle_timeout('http://pip.mercercounty.org/signin', 3, 'Timed out')
-    agol_status = requests.get('https://mercernj.maps.arcgis.com/home/index.html', timeout=3).status_code
-    data = {'message':
-        {
-        'maps.mercercounty.org/portal': f"Response: {str(portal_status)}",
-        'pip.mercercounty.org/signin': f"Response: {str(pip_status)}",
-        'mercernj.maps.arcgis.com/home': f"Response: {str(agol_status)}"
-        }
-    }
+    # Simple http request to any number of domains. Here to check on org domains which host GIS content.
+    with open('creds.json') as f:
+        # Store login credentials in another unversioned file.
+        creds = json.load(f)
+    data = {'message': {}}
+
+    for domain in creds['domains']:
+
+        logging.info(f"Sending https request to {creds['domains'][domain]}")
+
+        domain_status = handle_timeout(creds['domains'][domain], 3, 'Timed out')
+        data['message'][domain] = creds['domains'][domain], domain_status
+
+        logging.info(f"Request to {creds['domains'][domain]} returned ")
     return jsonify(data)
 
 @app.route('/api/backup_egdb', methods=['GET'])
