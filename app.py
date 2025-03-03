@@ -157,7 +157,7 @@ def list_sde_users():
 def download_file():
     print(True)
     try:
-        path = r"C:\Users\kcneinstedt\PycharmProjects\arcgis-monitoring\activity.log"
+        path = r"./activity.log"
         return send_file(path, as_attachment=True)
     except Exception as e:
         logging.error(e)

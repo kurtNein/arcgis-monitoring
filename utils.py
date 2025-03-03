@@ -29,14 +29,14 @@ class AutoMod:
         # Access the value you need
         self.username = data['agol']['username']
         self.password = data['agol']['password']
+        print(f"Attempting login as {self.username}")
         logging.info(f"Attempting login as {self.username}")
-        print(self.username)
-        try:
 
+        try:
             self.gis = GIS('home')
             logging.info(f"Logged in to {self.gis} as {self.username}")
         except Exception as e:
-            logging.error(f"Could not log in to {self.gis} as {self.username}.\nError:{e}")
+            logging.critical(f"Could not log in to {self.gis} as {self.username}.\nError:{e}")
             print(e)
 
         self._output_csv = ''
@@ -49,6 +49,11 @@ class AutoMod:
         services = (self.gis.content.search(query="", item_type="Feature Service", max_items=1000))
         total_services_queried = len(services)
         print(services, "\n", f"There are {total_services_queried} of this type")
+
+        for service in services:
+            logging.info(service)
+
+        logging.info(f"There are {total_services_queried} of this type")
 
         # Search AGOL for Web Maps.
         web_maps = self.gis.content.search(query="", item_type="Web Map", max_items=1000)
@@ -91,11 +96,15 @@ class AutoMod:
 
         arcpy.AddMessage('The following services are not used in any web maps:')
 
+        logging.info(f"Found {len(services)} feature services not present in any web map.\nServices are as follows:\n")
+
         for service in services:
             arcpy.AddMessage(f"{service.title} : {arcpy.GetActivePortalURL() + r'home/item.html?id=' + service.id}")
+            logging.info(f"{service.title} : {arcpy.GetActivePortalURL() + r'home/item.html?id=' + service.id}")
 
         arcpy.AddMessage(f"Of {total_services_queried} services, there are {len(services)} unused in your portal")
         return services
+
     def get_inactive_users(self, search_user='*', return_type=list):
 
         output_csv = fr'.\outputs\users_inactive_{self._GRACE_PERIOD_DAYS}_days_before_{str(datetime.now())[:9]}.csv'
@@ -144,21 +153,22 @@ class AutoMod:
 
         try:
             print(f"Working on {item.title}...")
-
+            logging.info(f"Working on {item.title}...")
             # Creates another AGOL item in the same portal in file geodatabase (.gdb) format.
-            result = item.export('sample {}'.format(item.title), download_format)
+            result = item.export('{}_{}'.format(item.title, item.owner), download_format)
             last_name = self.gis.properties.user.lastName
             process_time = time.strftime('%m-%d-%Y', time.localtime())
 
             # Download the AGOL .gdb that was just created, not the original item.
             result.download(f"outputs//AGOL_{last_name}__{process_time}")
             print(f"Processed {item.title}")
-
+            logging.info(f"Processed {item.title}")
             # The AGOL .gdb is still there taking up space in the portal, so clean it up. Leave original layer intact.
             result.delete()
 
         except Exception as e:
             print(e)
+            logging.error(f"Could not download {item.title} id {item.id}")
             return None
 
         return item.id, item.title, item.owner
@@ -172,7 +182,10 @@ class AutoMod:
             items = self.gis.content.search(query='owner:*', item_type='Feature *', max_items=500)
             for item in items:
                 print(item.id, item.title, item.owner)
+
             print(f"Search found {len(items)} items in this portal available.")
+            logging.info(f"Search found {len(items)} items in this portal available.")
+
             if ids_to_download:
             # Loop through each item and if equal to Feature service then download it
                 for item in items:
@@ -180,16 +193,20 @@ class AutoMod:
                         item_downloaded = self.download_item(item,download_format)
                         if item_downloaded is not None:
                             downloaded_items[item_downloaded[0]] = [item_downloaded[1], item_downloaded[2]]
-
                 return downloaded_items
 
             for item in items:
+                logging.info(f"Downloading {item.title} item id {item.id} by {item.owner}...")
                 item_downloaded = self.download_item(item, download_format)
                 if item_downloaded is not None:
                     downloaded_items[item_downloaded[0]] = [item_downloaded[1], item_downloaded[2]]
-
+                    logging.info(f"Downloaded {item.title} item id {item.id} successfully.")
         except Exception as e:
             print(e)
+            logging.error(e)
+
+        logging.info(f"Completed download of {len(downloaded_items)} items.")
+
         return downloaded_items
 
     def transfer_content(self, transfer_from_user: str, transfer_to_user: str):
@@ -224,8 +241,10 @@ class EnterpriseMod:
         self.username = data['egdb']['username']
         self.password = data['egdb']['password']
         self.sde = data['sde']
-        logging.info(f"Attempting login as {self.username}")
+
         print(self.username)
+        logging.info(f"Attempting login as {self.username}")
+
         try:
             logging.info(f"Attempting login as {self.username}")
             self.gis = GIS('https://maps.mercercounty.org/portal', self.username, self.password)
@@ -233,8 +252,8 @@ class EnterpriseMod:
             logging.info(f'Logged in to portal as {self.username}')
 
         except Exception as e:
-            logging.error(f"Could not log in to portal as {self.username}\nError:{e}")
             print(e)
+            logging.critical(f"Could not log in to portal as {self.username}\nError:{e}")
 
     def download_items_locally(self):
         downloaded_items = {'last backup started': time.strftime('%H:%M-_on_%m-%d-%Y'),
@@ -252,8 +271,8 @@ class EnterpriseMod:
 
         # Get feature classes
         feature_classes = arcpy.ListFeatureClasses()
-        logging.info(f'Found {len(feature_classes)} feature classes through .sde file.')
         print(feature_classes)
+        logging.info(f'Found {len(feature_classes)} feature classes through .sde file.')
         datasets = arcpy.ListDatasets(feature_type="Feature") or []
 
         # Copy standalone feature classes
@@ -261,10 +280,10 @@ class EnterpriseMod:
             #if fc not in ['DBO.TreesGT5in_2019']:
                 #continue
             try:
-                logging.info(f'Copying {fc.__str__()}...')
                 source_fc = os.path.join(sde_path, fc)
                 dest_fc = os.path.join(local_gdb_path, fc)
                 print(f"Copying {fc}...")
+                logging.info(f'Copying {fc.__str__()}...')
                 arcpy.CopyFeatures_management(source_fc, dest_fc)
                 downloaded_items['egdb backup'][fc] = {
                     'status': 'copied successfully',
@@ -300,3 +319,5 @@ class EnterpriseMod:
 if __name__ == '__main__':
     em = EnterpriseMod()
     em.download_items_locally()
+    am = AutoMod()
+    am.download_items_locally()
