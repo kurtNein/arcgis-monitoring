@@ -7,7 +7,6 @@ import requests
 
 from utils import AutoMod, EnterpriseMod
 
-
 logging.info('Initialized app.py')
 
 app = Flask(__name__)

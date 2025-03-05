@@ -15,7 +15,6 @@ import os.path
 import smtplib
 import time
 
-
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -358,7 +357,6 @@ class EnterpriseMod:
         for user in users_tuple:
             users[user.ID] = (user.Name, user.ClientName, user.ConnectionTime, user.IsDirectConnection)
         return users
-
 
 if __name__ == '__main__':
     em = EnterpriseMod()
