@@ -1,9 +1,8 @@
-import logging
 from arcpy.management import DowngradeAttachments
-from flask import Flask, render_template, jsonify, send_file
-from smtplib import SMTP
 import datetime
+from flask import Flask, render_template, jsonify, send_file
 import json
+import logging
 import requests
 
 from utils import AutoMod, EnterpriseMod
@@ -11,27 +10,6 @@ from utils import AutoMod, EnterpriseMod
 logging.info('Initialized app.py')
 
 app = Flask(__name__)
-
-def send_email():
-    DEBUG_LEVEL = 0
-
-    smtp = SMTP()
-    smtp.set_debuglevel(DEBUG_LEVEL)
-    smtp.connect('YOUR.MAIL.SERVER', 26)
-    smtp.login('USERNAME@DOMAIN', 'PASSWORD')
-
-    from_addr = "John Doe <john@doe.net>"
-    to_addr = "foo@bar.com"
-
-    subj = "hello"
-    date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
-
-    message_text = "Hello\nThis is a mail from your server\n\nBye\n"
-
-    msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % (from_addr, to_addr, subj, date, message_text)
-
-    smtp.sendmail(from_addr, to_addr, msg)
-    smtp.quit()
 
 def handle_timeout(url: str, timeout: int, message: str) -> str:
     status = message
