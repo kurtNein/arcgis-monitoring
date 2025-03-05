@@ -3,14 +3,17 @@ This file is for the handler classes. Handlers authenticate through a particular
 They can then perform several methods to fetch or save information from that portal.
 Information available is limited to the information available to the current GIS user, handled by ArcGIS authentication.
 """
-import os.path
 import arcpy
 from arcgis.gis import GIS
-from datetime import datetime, timedelta
-import time
 import csv
+from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import json
 import logging
+import os.path
+import smtplib
+import time
 
 
 logging.basicConfig(
@@ -19,6 +22,47 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     filename="activity.log"
 )
+
+# If you want email notifications when backups finish, assign email_recipient to an email address as string.
+email_recipient = None
+
+def send_email(recipient):
+    with open('creds.json') as f:
+        # Store login credentials in another unversioned file. Access them through this.
+        data = json.load(f)
+
+    SMTP_SERVER = data['smtp']['domain']
+    SMTP_PORT = data['smtp']['port']
+    EMAIL_ADDRESS = data['smtp']['address']
+    EMAIL_PASSWORD = data['smtp']['password']  # Use an App Password if using gmail domain
+    RECIPIENT = recipient  # The recipient's email. For multiple, call this in a loop
+
+    with open("stats.json", "r") as file:
+        stats = json.load(file)
+
+    # Convert JSON to a formatted string
+    json_string = json.dumps(stats, indent=4)
+
+    # Create the email
+    msg = MIMEMultipart()
+    msg["From"] = EMAIL_ADDRESS
+    msg["To"] = RECIPIENT
+    msg["Subject"] = "JSON Data from Python"
+
+    # Attach JSON string as email body
+    msg.attach(MIMEText(json_string, "plain"))
+
+    # Send email via SMTP
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            server.send_message(msg)
+            print("Email sent successfully!")
+            logging.info(f"Emailed {recipient} with stats")
+    except Exception as e:
+        print(f"Failed to send email to {recipient}: {e}")
+        logging.error(f"Failed to send email to {recipient}: {e}")
 
 class AutoMod:
     def __init__(self):
@@ -321,3 +365,5 @@ if __name__ == '__main__':
     em.download_items_locally()
     am = AutoMod()
     am.download_items_locally()
+    if email_recipient is not None:
+        send_email(email_recipient)
