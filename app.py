@@ -72,9 +72,9 @@ def backup_egdb():
     em = EnterpriseMod()
     downloaded_items = em.download_items_locally()
     downloaded_items_formatted = {}
-    for each in downloaded_items['egdb backup']:
-        print(each, downloaded_items['egdb backup'][each])
-        downloaded_items_formatted[f'{each}'] = str(downloaded_items['egdb backup'][each])
+    for each in downloaded_items['egdb_backup']:
+        print(each, downloaded_items['egdb_backup'][each])
+        downloaded_items_formatted[f'{each}'] = str(downloaded_items['egdb_backup'][each])
         print(downloaded_items_formatted)
     data = {'message': downloaded_items_formatted}
     return jsonify(data)
@@ -96,9 +96,9 @@ def get_stats():
     with open('stats.json') as j:
         downloaded_items = json.load(j)
     downloaded_items_formatted = {}
-    for each in downloaded_items['egdb backup']:
-        print(each, downloaded_items['egdb backup'][each])
-        downloaded_items_formatted[f'{each}'] = str(downloaded_items['egdb backup'][each])
+    for each in downloaded_items['egdb_backup']:
+        print(each, downloaded_items['egdb_backup'][each])
+        downloaded_items_formatted[f'{each}'] = str(downloaded_items['egdb_backup'][each])
         print(downloaded_items_formatted)
     data = {'message': downloaded_items_formatted}
     return jsonify(data)
@@ -109,16 +109,16 @@ def get_dashboard():
     with open('stats.json') as j:
         downloaded_items = json.load(j)
         print(downloaded_items)
-    total_items = len(downloaded_items['egdb backup'])
+    total_items = len(downloaded_items['egdb_backup'])
     failures = 0
-    for item in downloaded_items['egdb backup']:
+    for item in downloaded_items['egdb_backup']:
         # 'error' value is null in .json if it copied successfully, otherwise it should have the error text
-        if downloaded_items['egdb backup'][item]['error']:
+        if downloaded_items['egdb_backup'][item]['error']:
             failures += 1
     successes = total_items-failures
     data = {'message': {'Failures last backup': failures,
                         'Successes last backup': successes,
-                        'Date of last backup': downloaded_items['last backup completed']}}
+                        'Date of last backup': downloaded_items['last_backup_completed']}}
     return jsonify(data)
 
 @app.route('/api/sde_users', methods=['GET'])
