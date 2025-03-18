@@ -299,8 +299,8 @@ class EnterpriseMod:
             logging.critical(f"Could not log in to portal as {self.username}\nError:{e}")
 
     def download_items_locally(self):
-        downloaded_items = {'last backup started': time.strftime('%H:%M-_on_%m-%d-%Y'),
-                            'egdb backup': {}}
+        downloaded_items = {'last_backup_started': time.strftime('%H:%M-_on_%m-%d-%Y'),
+                            'egdb_backup': {}}
         sde_path = self.sde
         local_gdb_path = os.path.join(os.getcwd(), "outputs", fr"egdb_backup_{time.strftime('%H%M-_on_%m-%d-%Y')}.gdb")
         logging.info(f"Attempting Enterprise GDB backup through {sde_path}.\nDestination: {local_gdb_path}")
@@ -328,7 +328,7 @@ class EnterpriseMod:
                 print(f"Copying {fc}...")
                 logging.info(f'Copying {fc.__str__()}...')
                 arcpy.CopyFeatures_management(source_fc, dest_fc)
-                downloaded_items['egdb backup'][fc] = {
+                downloaded_items['egdb_backup'][fc] = {
                     'status': 'copied successfully',
                     'timestamp': time.strftime('%H%M_on_%m-%d-%Y'),
                     'error' : None,
@@ -336,14 +336,14 @@ class EnterpriseMod:
                     }
                 logging.info(f'{fc.__str__()} copied successfully.')
             except Exception as e:
-                downloaded_items['egdb backup'][fc] = {
+                downloaded_items['egdb_backup'][fc] = {
                     'status': 'copying failed',
                     'timestamp': time.strftime('%H%M_on_%m-%d-%Y'),
                     'error' : str(e)
                     }
                 logging.error(f'Failed to copy {fc.title}\nError: {e}')
             finally:
-                downloaded_items['last backup completed'] = time.strftime('%H%M-_on_%m-%d-%Y')
+                downloaded_items['last_backup_completed'] = time.strftime('%H%M-_on_%m-%d-%Y')
                 pass
         logging.info(f'Updating "stats.json" with status of {len(downloaded_items)} items.')
         with open('stats.json', 'w') as outfile:

@@ -41,7 +41,7 @@ function formatTime(number) {
 fetchData('/api/dashboard', 'output2', 'response2', 'Status of last EGDB backup', 'Fetching last EGDB details...');
 fetchData('/api/sde_users', 'output5', 'response5', 'Current users in .sde', 'Counting directly connected users on EGDB...');
 fetchData('/api/last_stats', 'output4', 'response4', 'Details of last EGDB backup', 'Fetching feature layers of last EGDB backup...');
-    
+
 async function yourFunction(){
 
     let now = new Date();
