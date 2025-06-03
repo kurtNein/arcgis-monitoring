@@ -5,6 +5,7 @@ Information available is limited to the information available to the current GIS
 """
 import arcpy
 from arcgis.gis import GIS
+import arcgis.apps
 import csv
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -14,6 +15,9 @@ import logging
 import os.path
 import smtplib
 import time
+import re
+import pandas as pd
+from scipy.constants import survey_foot
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -274,6 +278,58 @@ class AutoMod:
         for user in transfer_from_users:
             self.transfer_content(user, transfer_to_user)
 
+    def layer_to_csv(self):
+        pass
+
+    def report_with_query(self, where_clause: str, template_index=0):
+        survey_manager = arcgis.apps.survey123.SurveyManager(self.gis)
+        survey_by_id = survey_manager.get("7df2eded62054af9a7bdb169d3742f65")
+        print(survey_by_id)
+
+        templates = survey_by_id.report_templates
+
+        report_title_alphanum = re.sub(r'[^a-zA-Z0-9]', '', where_clause)
+
+        report = survey_by_id.generate_report(templates[0],
+                                              where=where_clause,
+                                              report_title=report_title_alphanum + "_test_report",
+                                              output_format="pdf"
+                                              )
+
+        print(f"Generating report: {survey_by_id} {report}")
+
+    def batch_report_with_query(self):
+        survey_manager = arcgis.apps.survey123.SurveyManager(self.gis)
+        survey_by_id = survey_manager.get("7df2eded62054af9a7bdb169d3742f65")
+        print(survey_by_id)
+
+        df = survey_by_id.download('DF')
+        print(df)
+
+        unique_agencies = df['rp_header_agency'].dropna().unique()
+
+        objectids_to_report = []
+
+        for agency in unique_agencies:
+            no_incident_type_ids = []
+            objectids_with_incident_type = []
+            filtered_df = df[df['rp_header_agency'] == agency]
+
+            for _, row in filtered_df.iterrows():
+                objectid = row['OBJECTID']
+                it_fst = str(row.get('IT_YN_FST_000', '')).lower()
+                it_fsc = str(row.get('IT_YN_FSC_000', '')).lower()
+
+                if 'no' in [it_fst, it_fsc]:
+                    no_incident_type_ids.append(objectid)
+                elif 'yes' in [it_fst, it_fsc]:
+                    objectids_with_incident_type.append(objectid)
+
+                # Get the max OBJECTID from the 'yes' list
+                max_objectid = max(objectids_with_incident_type) if objectids_with_incident_type else None
+                objectids_to_report.append(max_objectid)
+
+
 class EnterpriseMod:
     def __init__(self):
         with open('creds.json') as f:
@@ -359,9 +415,14 @@ class EnterpriseMod:
         return users
 
 if __name__ == '__main__':
+    """
     em = EnterpriseMod()
     em.download_items_locally()
     am = AutoMod()
     am.download_items_locally()
     if email_recipient is not None:
         send_email(email_recipient)
+    """
+    am = AutoMod()
+    #am.report_with_query("OBJECTID=1")
+    print(am.batch_report_with_query())
