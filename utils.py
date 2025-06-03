@@ -281,7 +281,7 @@ class AutoMod:
     def layer_to_csv(self):
         pass
 
-    def report_with_query(self, where_clause: str, template_index=0):
+    def report_with_query(self, where_clause: str, category="", template_index=0):
         survey_manager = arcgis.apps.survey123.SurveyManager(self.gis)
         survey_by_id = survey_manager.get("7df2eded62054af9a7bdb169d3742f65")
         print(survey_by_id)
@@ -292,7 +292,7 @@ class AutoMod:
 
         report = survey_by_id.generate_report(templates[0],
                                               where=where_clause,
-                                              report_title=report_title_alphanum + "_test_report",
+                                              report_title=category + where_clause + "_test_report",
                                               output_format="pdf"
                                               )
 
@@ -308,26 +308,54 @@ class AutoMod:
 
         unique_agencies = df['rp_header_agency'].dropna().unique()
 
-        objectids_to_report = []
+
 
         for agency in unique_agencies:
+            objectids_to_report = []
             no_incident_type_ids = []
             objectids_with_incident_type = []
             filtered_df = df[df['rp_header_agency'] == agency]
 
             for _, row in filtered_df.iterrows():
-                objectid = row['OBJECTID']
-                it_fst = str(row.get('IT_YN_FST_000', '')).lower()
-                it_fsc = str(row.get('IT_YN_FSC_000', '')).lower()
 
-                if 'no' in [it_fst, it_fsc]:
+                incident_type_answers = []
+
+                objectid = row['objectid']
+
+                IT_YN_FST_000 = str(row.get('IT_YN_FST_000', '')).lower()
+                IT_YN_FSC_000 = str(row.get('IT_YN_FSC_000', '')).lower()
+                IT_YN_RTH_000 = str(row.get('IT_YN_RTH_000', '')).lower()
+                IT_YN_FAC_000 = str(row.get('IT_YN_FAC_000', '')).lower()
+                IT_YN_FSD_000 = str(row.get('IT_YN_FSD_000', '')).lower()
+                IT_YN_MVR_000 = str(row.get('IT_YN_MVR_000', '')).lower()
+                IT_YN_RSD_000 = str(row.get('IT_YN_RSD_000', '')).lower()
+                IT_YN_RTW_000 = str(row.get('IT_YN_RTW_000', '')).lower()
+                IT_YN_RWI_000 = str(row.get('IT_YN_RWI_000', '')).lower()
+
+                list = [IT_YN_FST_000,IT_YN_FSC_000,IT_YN_RTH_000,IT_YN_FAC_000,IT_YN_FSD_000,IT_YN_MVR_000,IT_YN_RSD_000,IT_YN_RTW_000,IT_YN_RWI_000]
+                print(list)
+                if 'yes' not in list:
                     no_incident_type_ids.append(objectid)
-                elif 'yes' in [it_fst, it_fsc]:
+                elif 'yes' in list:
                     objectids_with_incident_type.append(objectid)
 
-                # Get the max OBJECTID from the 'yes' list
-                max_objectid = max(objectids_with_incident_type) if objectids_with_incident_type else None
-                objectids_to_report.append(max_objectid)
+
+
+            print("ObjectIDs with type: ",objectids_with_incident_type)
+            print("ObjectIDs with no type: ",no_incident_type_ids)
+
+            # Swap this list out for objectids_to_report for production use
+            try:
+                self.report_with_query(f'OBJECTID={max(objectids_with_incident_type)}', category=agency)
+            except ValueError as e:
+                print("No reportable ObjectIDs.")
+
+
+            if not len(no_incident_type_ids) == 0:
+                print(f"Following ObjectIDs had no incident type:\n")
+                for plan_id in no_incident_type_ids:
+                    print(plan_id)
+
 
 
 class EnterpriseMod:
