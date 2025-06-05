@@ -5,6 +5,7 @@ Information available is limited to the information available to the current GIS
 """
 import arcpy
 from arcgis.gis import GIS
+import arcgis.apps
 import csv
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -14,6 +15,9 @@ import logging
 import os.path
 import smtplib
 import time
+import re
+import pandas as pd
+from scipy.constants import survey_foot
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -274,6 +278,86 @@ class AutoMod:
         for user in transfer_from_users:
             self.transfer_content(user, transfer_to_user)
 
+    def layer_to_csv(self):
+        pass
+
+    def report_with_query(self, where_clause: str, category="", template_index=0):
+        survey_manager = arcgis.apps.survey123.SurveyManager(self.gis)
+        survey_by_id = survey_manager.get("7df2eded62054af9a7bdb169d3742f65")
+        print(survey_by_id)
+
+        templates = survey_by_id.report_templates
+
+        report_title_alphanum = re.sub(r'[^a-zA-Z0-9]', '', where_clause)
+
+        report = survey_by_id.generate_report(templates[0],
+                                              where=where_clause,
+                                              report_title=category + where_clause + "_test_report",
+                                              output_format="pdf"
+                                              )
+
+        print(f"Generating report: {survey_by_id} {report}")
+
+    def batch_report_with_query(self):
+        survey_manager = arcgis.apps.survey123.SurveyManager(self.gis)
+        survey_by_id = survey_manager.get("7df2eded62054af9a7bdb169d3742f65")
+        print(survey_by_id)
+
+        df = survey_by_id.download('DF')
+        print(df)
+
+        unique_agencies = df['rp_header_agency'].dropna().unique()
+
+
+
+        for agency in unique_agencies:
+            objectids_to_report = []
+            no_incident_type_ids = []
+            objectids_with_incident_type = []
+            filtered_df = df[df['rp_header_agency'] == agency]
+
+            for _, row in filtered_df.iterrows():
+
+                incident_type_answers = []
+
+                objectid = row['objectid']
+
+                IT_YN_FST_000 = str(row.get('IT_YN_FST_000', '')).lower()
+                IT_YN_FSC_000 = str(row.get('IT_YN_FSC_000', '')).lower()
+                IT_YN_RTH_000 = str(row.get('IT_YN_RTH_000', '')).lower()
+                IT_YN_FAC_000 = str(row.get('IT_YN_FAC_000', '')).lower()
+                IT_YN_FSD_000 = str(row.get('IT_YN_FSD_000', '')).lower()
+                IT_YN_MVR_000 = str(row.get('IT_YN_MVR_000', '')).lower()
+                IT_YN_RSD_000 = str(row.get('IT_YN_RSD_000', '')).lower()
+                IT_YN_RTW_000 = str(row.get('IT_YN_RTW_000', '')).lower()
+                IT_YN_RWI_000 = str(row.get('IT_YN_RWI_000', '')).lower()
+
+                list = [IT_YN_FST_000,IT_YN_FSC_000,IT_YN_RTH_000,IT_YN_FAC_000,IT_YN_FSD_000,IT_YN_MVR_000,IT_YN_RSD_000,IT_YN_RTW_000,IT_YN_RWI_000]
+                print(list)
+                if 'yes' not in list:
+                    no_incident_type_ids.append(objectid)
+                elif 'yes' in list:
+                    objectids_with_incident_type.append(objectid)
+
+
+
+            print("ObjectIDs with type: ",objectids_with_incident_type)
+            print("ObjectIDs with no type: ",no_incident_type_ids)
+
+            # Swap this list out for objectids_to_report for production use
+            try:
+                self.report_with_query(f'OBJECTID={max(objectids_with_incident_type)}', category=agency)
+            except ValueError as e:
+                print("No reportable ObjectIDs.")
+
+
+            if not len(no_incident_type_ids) == 0:
+                print(f"Following ObjectIDs had no incident type:\n")
+                for plan_id in no_incident_type_ids:
+                    print(plan_id)
+
+
+
 class EnterpriseMod:
     def __init__(self):
         with open('creds.json') as f:
@@ -359,9 +443,14 @@ class EnterpriseMod:
         return users
 
 if __name__ == '__main__':
+    """
     em = EnterpriseMod()
     em.download_items_locally()
     am = AutoMod()
     am.download_items_locally()
     if email_recipient is not None:
         send_email(email_recipient)
+    """
+    am = AutoMod()
+    #am.report_with_query("OBJECTID=1")
+    print(am.batch_report_with_query())
