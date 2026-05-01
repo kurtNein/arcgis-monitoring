@@ -142,4 +142,4 @@ def download_file():
         return jsonify({'message':{'Error': f'{e}'}})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, ssl_context='adhoc')
