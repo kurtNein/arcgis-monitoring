@@ -17,6 +17,7 @@ import smtplib
 import time
 import re
 import pandas as pd
+from pygments.lexers.textfmts import TodotxtLexer
 from scipy.constants import survey_foot
 
 logging.basicConfig(
@@ -202,7 +203,7 @@ class AutoMod:
             print(f"Working on {item.title}...")
             logging.info(f"Working on {item.title}...")
             # Creates another AGOL item in the same portal in file geodatabase (.gdb) format.
-            result = item.export('{}_{}'.format(item.title, item.owner), download_format)
+            result = item.export('{}_{}'.format(item.title, item.owner), download_format, wait=True)
             last_name = self.gis.properties.user.lastName
             process_time = time.strftime('%m-%d-%Y', time.localtime())
 
@@ -282,12 +283,21 @@ class AutoMod:
         pass
 
     def report_with_query(self, where_clause: str, category="", template_index=0):
+        """
+        Identifies a survey  in ArcGIS Online. To the table of survey responses, applies a filter with SQL WHERE clause.
+        Generates a PDF from a reporting template, then downloads this file to local Temp folder.
+        :param where_clause: A SQL clause string that would follow the keyword WHERE e.g. 'name = "John"'
+        :param category: What you would name this report e.g. report will be saved as category + where_clause.pdf
+        :param template_index: Index of the report template. Template list is in ArcGIS Online in 'Manage in Survey123'
+        :return: None. survey_by_id.generate_report() creates the intended report in Temp folder
+        """
         survey_manager = arcgis.apps.survey123.SurveyManager(self.gis)
         survey_by_id = survey_manager.get("7df2eded62054af9a7bdb169d3742f65")
         print(survey_by_id)
 
         templates = survey_by_id.report_templates
 
+        # Use in case where_clause could contain invalid characters for a file name.
         report_title_alphanum = re.sub(r'[^a-zA-Z0-9]', '', where_clause)
 
         report = survey_by_id.generate_report(templates[0],
@@ -299,17 +309,23 @@ class AutoMod:
         print(f"Generating report: {survey_by_id} {report}")
 
     def batch_report_with_query(self):
+        """
+
+        :return:
+        """
         survey_manager = arcgis.apps.survey123.SurveyManager(self.gis)
         survey_by_id = survey_manager.get("7df2eded62054af9a7bdb169d3742f65")
         print(survey_by_id)
 
+        # Assign variable to a dataframe object in memory, which is accomplished by using the download method with 'DF'.
         df = survey_by_id.download('DF')
         print(df)
 
+        # If doing a group-by style, grouping reports by a particular value, then we need unique values from one field.
         unique_agencies = df['rp_header_agency'].dropna().unique()
 
 
-
+        # For each unique value in the list of unique group-by value list:
         for agency in unique_agencies:
             objectids_to_report = []
             no_incident_type_ids = []
@@ -322,6 +338,7 @@ class AutoMod:
 
                 objectid = row['objectid']
 
+                # We're hard-coding fields in here. For each field, the field value is assigned to a same-name variable.
                 IT_YN_FST_000 = str(row.get('IT_YN_FST_000', '')).lower()
                 IT_YN_FSC_000 = str(row.get('IT_YN_FSC_000', '')).lower()
                 IT_YN_RTH_000 = str(row.get('IT_YN_RTH_000', '')).lower()
@@ -338,7 +355,6 @@ class AutoMod:
                     no_incident_type_ids.append(objectid)
                 elif 'yes' in list:
                     objectids_with_incident_type.append(objectid)
-
 
 
             print("ObjectIDs with type: ",objectids_with_incident_type)
